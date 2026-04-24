@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "build": "prisma generate && nest build",
+    "db:migrate:deploy": "prisma migrate deploy",
     "prisma:generate": "prisma generate",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "prisma:studio": "prisma studio --browser none",
@@ -15,7 +16,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/src/main.js",
+    "start:prod": "npm run db:migrate:deploy && node dist/src/main.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
