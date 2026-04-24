@@ -7,23 +7,34 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class PaymentsService {
-  private stripe: any;
+  private stripe: any | null = null;
 
-  constructor(private prisma: PrismaService) {
-    const StripeConstructor = require('stripe');
-    this.stripe = new StripeConstructor(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: '2024-06-20',
-    });
+  constructor(private prisma: PrismaService) {}
+
+  private getStripeClient() {
+    const secretKey = process.env.STRIPE_SECRET_KEY?.trim();
+    if (!secretKey) {
+      throw new BadRequestException('STRIPE_SECRET_KEY is not configured');
+    }
+
+    if (!this.stripe) {
+      const StripeConstructor = require('stripe');
+      this.stripe = new StripeConstructor(secretKey, {
+        apiVersion: '2024-06-20',
+      });
+    }
+
+    return this.stripe;
   }
 
   async createCheckoutSession(body: { appointmentId: string; amount: number }) {
-    if (!process.env.STRIPE_SECRET_KEY) {
-      throw new BadRequestException('STRIPE_SECRET_KEY is not configured');
-    }
+    const stripe = this.getStripeClient();
 
     if (!body?.appointmentId || !body?.amount || body.amount <= 0) {
       throw new BadRequestException('appointmentId and positive amount are required');
     }
+
+    const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
 
     const appointment = await this.prisma.appointment.findUnique({
       where: { id: body.appointmentId },
@@ -34,7 +45,7 @@ export class PaymentsService {
       throw new NotFoundException('Appointment not found');
     }
 
-    const session = await this.stripe.checkout.sessions.create({
+    const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
@@ -47,8 +58,8 @@ export class PaymentsService {
         },
       ],
       mode: 'payment',
-      success_url: 'http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}',
-      cancel_url: 'http://localhost:3000/booking',
+      success_url: `${frontendUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${frontendUrl}/booking`,
       metadata: { appointmentId: body.appointmentId },
     });
 
