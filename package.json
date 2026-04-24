@@ -13,7 +13,7 @@
     "prisma:studio:firefox": "prisma studio --browser firefox",
     "setup-admin": "node scripts/setup-admin.js",
     "recover-admin": "node scripts/recover-admin.js",
-    "start": "nest start",
+    "start": "npm run start:prod",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "npm run db:migrate:deploy && node dist/src/main.js",
