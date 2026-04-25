@@ -79,7 +79,31 @@ export class AuthService {
       });
     } catch (error: any) {
       if (error?.code === 'P2002') {
-        throw new ConflictException('Email already exists');
+        // If the email already exists and no ADMIN exists yet, convert that user into ADMIN.
+        const existingUser = await this.prisma.user.findUnique({
+          where: { email },
+          select: { id: true },
+        });
+
+        if (!existingUser) {
+          throw new ConflictException('Email already exists');
+        }
+
+        return await this.prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            name,
+            password: hashedPassword,
+            role: 'ADMIN',
+          },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            createdAt: true,
+          },
+        });
       }
 
       throw error;
