@@ -2,6 +2,7 @@
 // npm install --save-dev prisma dotenv
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
+import { getDatabaseUrl } from "./database-connection.js";
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -9,7 +10,7 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    // Use direct connection for migrations; fallback to pooled URL.
-    url: process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"],
+    // Prefer Railway's private database variables; fallback to existing env URLs.
+    url: getDatabaseUrl(),
   },
 });

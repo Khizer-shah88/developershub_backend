@@ -5,6 +5,7 @@ const { PrismaPg } = require('@prisma/adapter-pg');
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { getDatabaseUrl } = require('../database-connection.js');
 
 function parseArgs(argv) {
   const out = {};
@@ -28,9 +29,9 @@ function generateTemporaryPassword() {
 }
 
 async function main() {
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = getDatabaseUrl();
   if (!connectionString) {
-    throw new Error('DATABASE_URL is not set');
+    throw new Error('Database connection URL is not set');
   }
 
   const args = parseArgs(process.argv.slice(2));
@@ -44,7 +45,10 @@ async function main() {
     );
   }
 
-  const pool = new Pool({ connectionString });
+  const pool = new Pool({
+    connectionString,
+    family: 4,
+  });
   const adapter = new PrismaPg(pool);
   const prisma = new PrismaClient({ adapter });
 

@@ -2,6 +2,7 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
+import { getDatabaseUrl } from '../../database-connection.js';
 
 @Injectable()
 export class PrismaService
@@ -9,10 +10,10 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor() {
-    const connectionString = process.env.DATABASE_URL;
+    const connectionString = getDatabaseUrl();
 
     if (!connectionString) {
-      throw new Error('DATABASE_URL is not set');
+      throw new Error('Database connection URL is not set');
     }
 
     const pool = new Pool({
