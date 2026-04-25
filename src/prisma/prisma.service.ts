@@ -18,7 +18,6 @@ export class PrismaService
 
     const pool = new Pool({
       connectionString,
-      family: 4,
     });
     const adapter = new PrismaPg(pool);
 

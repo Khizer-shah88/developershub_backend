@@ -5,7 +5,7 @@
   "description": "Nest TypeScript starter repository",
   "license": "MIT",
   "scripts": {
-    "build": "prisma generate && nest build",
+    "build": "prisma generate && npx --yes @nestjs/cli@11.0.0 build",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:deploy:optional": "sh -c 'npm run db:migrate:deploy || echo \"Migration skipped (database unreachable). Continuing startup.\"'",
     "prisma:generate": "prisma generate",
